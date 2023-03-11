@@ -1,0 +1,29 @@
+body {
+	margin: 0px;
+	min-height: 100vh;
+}
+
+main {
+	min-height: inherit;
+	display: grid;
+	grid-template: 1fr / 1fr 2fr 1fr;
+}
+
+table, td {
+	border: 5px solid black;
+	border-collapse: collapse;
+}
+
+.contenedor {
+	display: flex;
+	justify-content: center;
+	align-items: center;
+}
+
+.tablero {
+	display: grid;
+	grid-template: repeat(3, 1fr) / repeat(3, 1fr);
+	height: 500px;
+	width: 500px;
+	font-size: 8rem;
+}
