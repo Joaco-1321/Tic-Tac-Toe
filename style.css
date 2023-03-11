@@ -26,4 +26,5 @@ table, td {
 	height: 500px;
 	width: 500px;
 	font-size: 8rem;
+	user-select: none;
 }

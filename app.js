@@ -14,7 +14,7 @@ let body = document.getElementsByTagName('body')[0],
 		[2, 4, 6]
 	],
 	turnoX = true,
-	turno = 0;
+	turno = 1;
 
 body.addEventListener('load', maquetaPagina());
 
@@ -106,17 +106,38 @@ function turnoJugador(event) {
 	}
 
 	celda.removeEventListener('click', turnoJugador);
-	// console.log(posX);
-	// console.log(posiciones);
-	// console.log(posX.includes(posiciones));
+
+	if (turno > 4) {
+		ganador();
+	}
+
+	turno++;
 	turnoX = !turnoX;
 }
 
-// function ganador() {
+function ganador() {
 
-// 	jugador = turnoX ? posX : posO;
+	let jugador = turnoX ? posX : posO,
+		contador,
+		posGan = 0,
+		posJug = 0;
 
-// 	for (let i = 0; i < posiciones.length; i++) {
+	do {
+		contador = 0;
+		posJug = 0;
+		do {
+			if (posiciones[posGan].includes(jugador[posJug])) {
+				contador++;
+			}
+			posJug++
+		} while (contador < 3 && posJug < jugador.length);
+		posGan++
+	} while (contador < 3 && posGan < posiciones.length);
 
-// 	}
-// }
+	if (contador === 3) {
+		for (let i = 0; i < casillas.length; i++) {
+			casillas[i].removeEventListener('click', turnoJugador);
+		}
+		console.log(`ganaron las ${turnoX ? 'X' : 'O'}`);
+	}
+}
