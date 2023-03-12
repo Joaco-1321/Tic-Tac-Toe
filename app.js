@@ -1,10 +1,16 @@
-let body = document.getElementsByTagName('body')[0],
-	casillas = [],
-	puntajeX = 0,
-	puntajeO = 0,
-	posX = [],
-	posO = [],
-	posiciones = [
+//! const ya que son constantes en el transcurso del programa
+const body = document.getElementsByTagName('body')[0],
+	/**
+	 **	 array que guarda las celdas para mayor
+	 **	 facilidad de acceso
+	 */
+	celdas = [],
+	/**
+	 **	 array que guarda las celdas en las que se
+	 **	 puso una X [0] o una O [1] respectivamente
+	 */
+	celdasJugadas = [[], []],
+	combinacionesValidas = [
 		[3, 4, 5],
 		[0, 3, 6],
 		[1, 4, 7],
@@ -12,19 +18,44 @@ let body = document.getElementsByTagName('body')[0],
 		[0, 4, 8],
 		[2, 4, 6]
 	],
-	turnoX = true,
-	turno = 1,
-	tiempo = 5,
+	/**
+	 **	array que guarda los puntos de
+	 **	X [0] y O [1] respectivamente
+	 */
+	puntos = [0, 0],
+	/**
+	 **	array que contiene los divs con los puntajes
+	 **	global para mayor facilidad de acceso
+	 */
+	puntaje = [],
+	/**
+	 **	contiene el temporizador
+	 ** global para mayor facilidad de acceso
+	 */
+	tiempo = document.createElement('div');
+
+let esTurnoDe_X = true,
+	turnos = 0,
+	tiempoRestante = 5,
 	temp;
 
+/**
+ **	 añado un eventListener al body para que al cargar
+ **	 la página se ejecute la función maquetaPagina()
+ */
 body.addEventListener('load', maquetaPagina());
 
+// función que maqueta la página
 function maquetaPagina() {
 
-	let section,
-		main;
+	const header = document.createElement('header'),
+		main = document.createElement('main');
 
-	main = document.createElement('main');
+	let section;
+
+	header.classList.add('contenedor')
+	header.innerHTML = '<h1>Tic Tac Toe</h1>';
+	body.appendChild(header);
 
 	for (let i = 0; i < 3; i++) {
 
@@ -49,149 +80,168 @@ function maquetaPagina() {
 	}
 
 	body.appendChild(main);
-	dibujarPuntuacion();
+	dibujarPuntaje();
 	dibujarTablero();
-	dibujarTemporizador();
+	dibujarTiempo();
 }
 
-function dibujarPuntuacion() {
+// función que dibuja la puntuación
+function dibujarPuntaje() {
 
-	let puntuacion,
-		div = document.createElement('div'),
-		divX = document.createElement('div'),
-		divO = document.createElement('div');
+	const puntuacion = document.getElementsByClassName('puntuacion')[0],
+		div = document.createElement('div');
 
-	puntuacion = document.getElementsByClassName('puntuacion')[0];
-	divX.classList.add('puntaje', 'contenedor');
-	divO.classList.add('puntaje', 'contenedor');
-	divX.textContent = 'puntos X: ' + puntajeX;
-	divO.textContent = 'puntos O: ' + puntajeO;
-	div.appendChild(divX);
-	div.appendChild(divO);
+	for (let i = 0; i < 2; i++) {
+
+		puntaje.push(document.createElement('div'));
+		puntaje[i].classList.add('puntaje', 'contenedor');
+
+		if (i == 0) {
+			puntaje[i].classList.add('actual');
+			puntaje[i].textContent = `X ${puntos[i]}`;
+		} else {
+			puntaje[i].textContent = `O ${puntos[i]}`;
+		}
+
+		div.appendChild(puntaje[i]);
+
+	}
+
 	puntuacion.appendChild(div);
 
 }
-
+// función que dibuja el tablero
 function dibujarTablero() {
 
-	let tablero,
-		juego,
-		casilla;
+	const juego = document.getElementsByClassName('juego')[0],
+		tablero = document.createElement('div');
 
-	juego = document.getElementsByClassName('juego')[0];
-	tablero = document.createElement('div');
+	let casilla;
+
 	tablero.classList.add('tablero');
-	juego.appendChild(tablero);
 
 	for (let i = 0; i < 9; i++) {
 
 		casilla = document.createElement('div');
 		casilla.classList.add('contenedor');
 		casilla.addEventListener('click', turnoJugador);
+		casilla.style.borderStyle = 'solid';
+
 
 		switch (i) {
 			case 0:
-				casilla.style.borderStyle = 'solid';
 				casilla.style.borderWidth = '0px 2.5px 2.5px 0px';
 				break;
 			case 1:
-				casilla.style.borderStyle = 'solid';
 				casilla.style.borderWidth = '0px 2.5px 2.5px 2.5px';
 				break;
 			case 2:
-				casilla.style.borderStyle = 'solid';
 				casilla.style.borderWidth = '0px 0px 2.5px 2.5px';
 				break;
 			case 3:
-				casilla.style.borderStyle = 'solid';
 				casilla.style.borderWidth = '2.5px 2.5px 2.5px 0px';
 				break;
 			case 4:
 				casilla.style.border = '2.5px solid black';
 				break;
 			case 5:
-				casilla.style.borderStyle = 'solid';
 				casilla.style.borderWidth = '2.5px 0px 2.5px 2.5px';
 				break;
 			case 6:
-				casilla.style.borderStyle = 'solid';
 				casilla.style.borderWidth = '2.5px 2.5px 0px 0px';
 				break;
 			case 7:
-				casilla.style.borderStyle = 'solid';
 				casilla.style.borderWidth = '2.5px 2.5px 0px 2.5px';
 				break;
 			case 8:
-				casilla.style.borderStyle = 'solid';
 				casilla.style.borderWidth = '2.5px 0px 0px 2.5px';
 				break;
 		}
 
-		casillas.push(casilla);
+		celdas.push(casilla);
 		tablero.appendChild(casilla);
 
 	}
+
+	juego.appendChild(tablero);
+
 }
 
-function dibujarTemporizador() {
+// función que dibuja el temporizador
+function dibujarTiempo() {
 
-	let temporizador = document.getElementsByClassName('temporizador')[0],
-		div = document.createElement('div');
+	const temporizador = document.getElementsByClassName('temporizador')[0];
 
-	div.textContent = 'tiempo: ' + tiempo;
-	div.classList.add('contenedor', 'tiempo');
-	temporizador.appendChild(div);
+	tiempo.classList.add('contenedor');
+	tiempo.textContent = 'tiempo ' + tiempoRestante--;
+	temporizador.appendChild(tiempo);
+
+}
+
+function cuentaAtras() {
+
+	if (tiempoRestante === 6) {
+		esTurnoDe_X = !esTurnoDe_X;
+		puntaje[0].classList.toggle('actual');
+		puntaje[1].classList.toggle('actual');
+	}
+
+	tiempo.textContent = 'tiempo ' + --tiempoRestante
+
+	if (tiempoRestante === 1) {
+		tiempoRestante = 6;
+	}
 
 }
 
 function turnoJugador(event) {
 
-	let casilla = event['target'];
+	const casilla = event['target'];
 
-	clearInterval(temp);
-	tiempo = tiempo != 5 ? 6 : 5;
-	temp = setInterval(bajaTemporizador, 1000);
+	let ganador,
+		indice,
+		letra;
 
-	if (turnoX) {
-		casilla.textContent = 'X';
-		posX.push(casillas.indexOf(casilla));
+	if (esTurnoDe_X) {
+		letra = 'X';
+		indice = 0;
 	} else {
-		casilla.textContent = 'O';
-		posO.push(casillas.indexOf(casilla));
+		letra = 'O';
+		indice = 1;
 	}
 
+	casilla.textContent = letra;
 	casilla.removeEventListener('click', turnoJugador);
+	celdasJugadas[indice].push(celdas.indexOf(casilla));
 
-	if (turno > 4) {
-		ganador();
+	ganador = verificaGanador();
+
+	if (!ganador) {
+
+		tiempoRestante = 5;
+		tiempo.textContent = 'tiempo ' + tiempoRestante
+
+		if (++turnos > 1) {
+			clearInterval(temp);
+		}
+
+		temp = setInterval(cuentaAtras, 1000);
+		esTurnoDe_X = !esTurnoDe_X;
+		puntaje[0].classList.toggle('actual');
+		puntaje[1].classList.toggle('actual');
+
 	}
-
-	turno++;
-	turnoX = !turnoX;
 
 }
 
-function bajaTemporizador() {
+function verificaGanador() {
 
-	let temporizador = document.getElementsByClassName('tiempo')[0];
+	const jugador = esTurnoDe_X ? celdasJugadas[0] : celdasJugadas[1];
 
-	temporizador.textContent = 'tiempo: ' + --tiempo;
-
-	if (tiempo == 1) {
-		tiempo = 6;
-		turnoX = !turnoX;
-	}
-
-}
-
-function ganador() {
-
-	let jugador = turnoX ? posX : posO,
+	let ganador = false,
 		contador,
 		posGan = 0,
-		posJug = 0,
-		divX = document.getElementsByClassName('puntaje')[0],
-		divO = document.getElementsByClassName('puntaje')[1];
+		posJug = 0;
 
 	do {
 
@@ -199,22 +249,46 @@ function ganador() {
 		posJug = 0;
 
 		do {
-			if (posiciones[posGan].includes(jugador[posJug])) {
+
+			if (combinacionesValidas[posGan].includes(jugador[posJug])) {
 				contador++;
 			}
+
 			posJug++
+
 		} while (contador < 3 && posJug < jugador.length);
+
+		if (contador === 3) {
+
+			for (let i = 0; i < contador; i++) {
+				celdas[combinacionesValidas[posGan][i]].classList.toggle('ganador');
+			}
+
+		}
 
 		posGan++
 
-	} while (contador < 3 && posGan < posiciones.length);
+	} while (contador < 3 && posGan < combinacionesValidas.length);
 
 	if (contador === 3) {
+
+		ganador = true;
 		clearInterval(temp);
-		for (let casilla of casillas) {
+
+		for (let casilla of celdas) {
 			casilla.removeEventListener('click', turnoJugador);
 		}
-		turnoX ? puntajeX++ : puntajeO++;
-		turnoX ? divX.textContent = 'puntos X: ' + puntajeX : divO.textContent = 'puntos O: ' + puntajeO;
+
+		if (esTurnoDe_X) {
+			puntaje[0].textContent = 'X ' + ++puntos[0];
+			puntaje[0].classList.toggle('ganador');
+		} else {
+			puntaje[1].textContent = 'O ' + ++puntos[1];
+			puntaje[1].classList.toggle('ganador');
+		}
+
 	}
+
+	return ganador;
+
 }
