@@ -1,15 +1,10 @@
-//! const ya que son constantes en el transcurso del programa
+//! const ya que no cambian
 const body = document.getElementsByTagName('body')[0],
 	/**
 	 **	 array que guarda las celdas para mayor
 	 **	 facilidad de acceso
 	 */
 	celdas = [],
-	/**
-	 **	 array que guarda las celdas en las que se
-	 **	 puso una X [0] o una O [1] respectivamente
-	 */
-	celdasJugadas = [[], []],
 	combinacionesValidas = [
 		[3, 4, 5],
 		[0, 3, 6],
@@ -32,9 +27,15 @@ const body = document.getElementsByTagName('body')[0],
 	 **	contiene el temporizador
 	 ** global para mayor facilidad de acceso
 	 */
-	tiempo = document.createElement('div');
+	tiempo = document.createElement('div'),
+	tablero = document.createElement('div');
 
-let esTurnoDe_X = true,
+/**
+ **	 array que guarda las celdas en las que se
+**	 puso una X [0] o una O [1] respectivamente
+*/
+let celdasJugadas = [[], []],
+	esTurnoDe_X = true,
 	turnos = 0,
 	tiempoRestante = 5,
 	temp;
@@ -45,7 +46,11 @@ let esTurnoDe_X = true,
  */
 body.addEventListener('load', maquetaPagina());
 
-// función que maqueta la página
+/**
+ **	maqueta la pagina
+ * 
+ * @returns void
+ */
 function maquetaPagina() {
 
 	const header = document.createElement('header'),
@@ -85,7 +90,11 @@ function maquetaPagina() {
 	dibujarTiempo();
 }
 
-// función que dibuja la puntuación
+/**
+ **	dibuja el puntaje
+ * 
+ * @returns void
+ */
 function dibujarPuntaje() {
 
 	const puntuacion = document.getElementsByClassName('puntuacion')[0],
@@ -110,11 +119,15 @@ function dibujarPuntaje() {
 	puntuacion.appendChild(div);
 
 }
-// función que dibuja el tablero
+
+/**
+ **	dibuja el tablero
+ * 
+ * @returns void
+ */
 function dibujarTablero() {
 
-	const juego = document.getElementsByClassName('juego')[0],
-		tablero = document.createElement('div');
+	const juego = document.getElementsByClassName('juego')[0];
 
 	let casilla;
 
@@ -167,7 +180,11 @@ function dibujarTablero() {
 
 }
 
-// función que dibuja el temporizador
+/**
+ **	dibuja el temporizador
+ * 
+ * @returns void
+ */
 function dibujarTiempo() {
 
 	const temporizador = document.getElementsByClassName('temporizador')[0];
@@ -178,6 +195,12 @@ function dibujarTiempo() {
 
 }
 
+/**
+ **	función que va disminuyendo el temporizador
+ ** si el tiempo llega a 1, se cambia de turno
+ * 
+ * @returns void
+ */
 function cuentaAtras() {
 
 	if (tiempoRestante === 6) {
@@ -194,6 +217,13 @@ function cuentaAtras() {
 
 }
 
+/**
+ ** función que se ejecuta al hacer click en
+ ** alguna de las celdas, la llena con la ficha
+ ** del jugador que sea su turno
+ * 
+ * @returns void
+ */
 function turnoJugador(event) {
 
 	const casilla = event['target'];
@@ -201,6 +231,8 @@ function turnoJugador(event) {
 	let ganador,
 		indice,
 		letra;
+
+	idle = 0;
 
 	if (esTurnoDe_X) {
 		letra = 'X';
@@ -218,22 +250,40 @@ function turnoJugador(event) {
 
 	if (!ganador) {
 
-		tiempoRestante = 5;
-		tiempo.textContent = 'tiempo ' + tiempoRestante
+		if (++turnos < 9) {
 
-		if (++turnos > 1) {
+			tiempoRestante = 5;
+			tiempo.textContent = 'tiempo ' + tiempoRestante
+
 			clearInterval(temp);
+			temp = setInterval(cuentaAtras, 1000);
+
+			esTurnoDe_X = !esTurnoDe_X;
+			puntaje[0].classList.toggle('actual');
+			puntaje[1].classList.toggle('actual');
+
+		} else {
+
+			clearInterval(temp);
+			tablero.classList.toggle('actual');
+			setTimeout(reiniciarJuego, 2000);
+
 		}
 
-		temp = setInterval(cuentaAtras, 1000);
-		esTurnoDe_X = !esTurnoDe_X;
-		puntaje[0].classList.toggle('actual');
-		puntaje[1].classList.toggle('actual');
+	} else {
+
+		setTimeout(reiniciarJuego, 2000);
 
 	}
 
 }
 
+/**
+ **	verifica si hay un ganador
+ ** retorna true o false depeniendo de si hay ganador o no
+ * 
+ * @returns boolean
+ */
 function verificaGanador() {
 
 	const jugador = esTurnoDe_X ? celdasJugadas[0] : celdasJugadas[1];
@@ -290,5 +340,48 @@ function verificaGanador() {
 	}
 
 	return ganador;
+
+}
+
+/**
+ **	función que reinicia el juego manteniendo los puntajes
+ * 
+ * @returns void
+ */
+function reiniciarJuego() {
+
+	turnos = 0;
+
+	for (let i = 0; i < 9; i++) {
+
+		if (celdas[i].textContent !== '') {
+			celdas[i].textContent = '';
+		}
+
+		celdas[i].classList.remove('ganador');
+		celdas[i].removeEventListener('click', turnoJugador);
+		celdas[i].addEventListener('click', turnoJugador);
+
+	}
+
+	if (esTurnoDe_X) {
+		puntaje[0].classList.remove('ganador');
+	} else {
+		puntaje[1].classList.remove('ganador');
+	}
+
+	puntaje[0].classList.toggle('actual');
+	puntaje[1].classList.toggle('actual');
+
+	celdasJugadas[0] = [];
+	celdasJugadas[1] = [];
+
+	tablero.classList.remove('actual');
+
+	esTurnoDe_X = !esTurnoDe_X;
+	
+	tiempoRestante = 5;
+	tiempo.textContent = 'tiempo ' + tiempoRestante
+
 
 }

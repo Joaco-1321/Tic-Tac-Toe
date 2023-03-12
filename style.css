@@ -33,6 +33,7 @@ td {
 	display: flex;
 	justify-content: center;
 	align-items: center;
+	transition: background-color 1s;
 }
 
 .puntuacion>div {
@@ -51,11 +52,6 @@ td {
 	transition: background-color 0.5s;
 }
 
-.actual {
-	background-color: #E6BA95;
-	transition: background-color 1s;
-}
-
 .tablero {
 	display: grid;
 	grid-template: repeat(3, 1fr) / repeat(3, 1fr);
@@ -66,7 +62,13 @@ td {
 	width: 500px;
 	font-size: 8rem;
 	font-weight: 400;
+	transition: background-color 1s;
 	font-family: 'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;
+}
+
+.actual {
+	background-color: #e6ba95;
+	transition: background-color 1s;
 }
 
 .ganador {
