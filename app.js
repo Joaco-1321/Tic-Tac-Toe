@@ -1,8 +1,7 @@
 let body = document.getElementsByTagName('body')[0],
-	main = document.createElement('main'),
-	tablero = document.createElement('div'),
-	section, juego, casilla,
 	casillas = [],
+	puntajeX = 0,
+	puntajeO = 0,
 	posX = [],
 	posO = [],
 	posiciones = [
@@ -14,43 +13,82 @@ let body = document.getElementsByTagName('body')[0],
 		[2, 4, 6]
 	],
 	turnoX = true,
-	turno = 1;
+	turno = 1,
+	tiempo = 5,
+	temp;
 
 body.addEventListener('load', maquetaPagina());
 
 function maquetaPagina() {
-	body.appendChild(main);
+
+	let section,
+		main;
+
+	main = document.createElement('main');
 
 	for (let i = 0; i < 3; i++) {
+
 		section = document.createElement('section');
-		main.appendChild(section);
+
 		switch (i) {
 			case 0:
-				section.classList.add('menu');
+				section.classList.add('puntuacion', 'contenedor');
 				break;
 
 			case 1:
-				section.classList.add('juego');
+				section.classList.add('juego', 'contenedor');
 				break;
 
 			case 2:
-				section.classList.add('temporizador');
+				section.classList.add('temporizador', 'contenedor');
 				break;
 		}
+
+		main.appendChild(section);
+
 	}
+
+	body.appendChild(main);
+	dibujarPuntuacion();
 	dibujarTablero();
+	dibujarTemporizador();
+}
+
+function dibujarPuntuacion() {
+
+	let puntuacion,
+		div = document.createElement('div'),
+		divX = document.createElement('div'),
+		divO = document.createElement('div');
+
+	puntuacion = document.getElementsByClassName('puntuacion')[0];
+	divX.classList.add('puntaje', 'contenedor');
+	divO.classList.add('puntaje', 'contenedor');
+	divX.textContent = 'puntos X: ' + puntajeX;
+	divO.textContent = 'puntos O: ' + puntajeO;
+	div.appendChild(divX);
+	div.appendChild(divO);
+	puntuacion.appendChild(div);
+
 }
 
 function dibujarTablero() {
+
+	let tablero,
+		juego,
+		casilla;
+
 	juego = document.getElementsByClassName('juego')[0];
-	juego.classList.add('contenedor');
+	tablero = document.createElement('div');
 	tablero.classList.add('tablero');
 	juego.appendChild(tablero);
 
 	for (let i = 0; i < 9; i++) {
+
 		casilla = document.createElement('div');
 		casilla.classList.add('contenedor');
 		casilla.addEventListener('click', turnoJugador);
+
 		switch (i) {
 			case 0:
 				casilla.style.borderStyle = 'solid';
@@ -88,24 +126,41 @@ function dibujarTablero() {
 				casilla.style.borderWidth = '2.5px 0px 0px 2.5px';
 				break;
 		}
+
 		casillas.push(casilla);
 		tablero.appendChild(casilla);
+
 	}
+}
+
+function dibujarTemporizador() {
+
+	let temporizador = document.getElementsByClassName('temporizador')[0],
+		div = document.createElement('div');
+
+	div.textContent = 'tiempo: ' + tiempo;
+	div.classList.add('contenedor', 'tiempo');
+	temporizador.appendChild(div);
+
 }
 
 function turnoJugador(event) {
 
-	let celda = event['target'];
+	let casilla = event['target'];
+
+	clearInterval(temp);
+	tiempo = tiempo != 5 ? 6 : 5;
+	temp = setInterval(bajaTemporizador, 1000);
 
 	if (turnoX) {
-		celda.textContent = 'X';
-		posX.push(casillas.indexOf(celda));
+		casilla.textContent = 'X';
+		posX.push(casillas.indexOf(casilla));
 	} else {
-		celda.textContent = 'O';
-		posO.push(casillas.indexOf(celda));
+		casilla.textContent = 'O';
+		posO.push(casillas.indexOf(casilla));
 	}
 
-	celda.removeEventListener('click', turnoJugador);
+	casilla.removeEventListener('click', turnoJugador);
 
 	if (turno > 4) {
 		ganador();
@@ -113,6 +168,20 @@ function turnoJugador(event) {
 
 	turno++;
 	turnoX = !turnoX;
+
+}
+
+function bajaTemporizador() {
+
+	let temporizador = document.getElementsByClassName('tiempo')[0];
+
+	temporizador.textContent = 'tiempo: ' + --tiempo;
+
+	if (tiempo == 1) {
+		tiempo = 6;
+		turnoX = !turnoX;
+	}
+
 }
 
 function ganador() {
@@ -120,24 +189,32 @@ function ganador() {
 	let jugador = turnoX ? posX : posO,
 		contador,
 		posGan = 0,
-		posJug = 0;
+		posJug = 0,
+		divX = document.getElementsByClassName('puntaje')[0],
+		divO = document.getElementsByClassName('puntaje')[1];
 
 	do {
+
 		contador = 0;
 		posJug = 0;
+
 		do {
 			if (posiciones[posGan].includes(jugador[posJug])) {
 				contador++;
 			}
 			posJug++
 		} while (contador < 3 && posJug < jugador.length);
+
 		posGan++
+
 	} while (contador < 3 && posGan < posiciones.length);
 
 	if (contador === 3) {
-		for (let i = 0; i < casillas.length; i++) {
-			casillas[i].removeEventListener('click', turnoJugador);
+		clearInterval(temp);
+		for (let casilla of casillas) {
+			casilla.removeEventListener('click', turnoJugador);
 		}
-		console.log(`ganaron las ${turnoX ? 'X' : 'O'}`);
+		turnoX ? puntajeX++ : puntajeO++;
+		turnoX ? divX.textContent = 'puntos X: ' + puntajeX : divO.textContent = 'puntos O: ' + puntajeO;
 	}
 }

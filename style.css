@@ -20,6 +20,20 @@ table, td {
 	align-items: center;
 }
 
+.puntuacion > div {
+	display: flex;
+	flex-wrap: wrap;
+	align-content: space-around;
+	height: 300px;
+	width: 300px;
+}
+
+.puntuacion > div div {
+	font-size: 2rem;
+	height: 30%;
+	width: 100%;
+}
+
 .tablero {
 	display: grid;
 	grid-template: repeat(3, 1fr) / repeat(3, 1fr);
@@ -27,4 +41,10 @@ table, td {
 	width: 500px;
 	font-size: 8rem;
 	user-select: none;
+}
+
+.temporizador > div {
+	font-size: 2rem;
+	height: 100px;
+	width: 300px;
 }
